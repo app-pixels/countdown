@@ -1,0 +1,5 @@
+# Hourglass Timer — copy to SD card as /setup/setup.txt
+# Duration controlled by POMODORO_WORK_MIN
+BRIGHTNESS = 200
+TIMEOUT    = 0
+POMODORO_WORK_MIN = 25
