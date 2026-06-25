@@ -413,7 +413,7 @@ void app_countdown_set_config(uint32_t duration_min) {
     if (duration_min >= 1 && duration_min <= 180) s_minutes = duration_min;
 }
 
-void app_countdown_setup(Arduino_SH8601 *gfx) {
+void app_countdown_setup(Arduino_OLED *gfx) {
     (void)gfx;
     canvas = g_canvas;
 
