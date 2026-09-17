@@ -2,7 +2,7 @@
 
 # countdown
 
-**Countdown** · v1.0.0
+**Countdown** · v1.0.2
 
 Digital countdown with a progress bar and end-beep.
 

@@ -26,9 +26,8 @@
 #include <SD_MMC.h>
 #include <FS.h>
 #include "canvas/Arduino_Canvas.h"
-#include "pin_config.h"
+#include "board.h"
 #include "HWCDC.h"
-#include "TouchDrvFT6X36.hpp"
 #include "audio_engine.h"
 
 extern USBCDC USBSerial;
@@ -78,7 +77,10 @@ static const uint8_t DIGIT_5x7[10][7] = {
 
 // ── State ────────────────────────────────────────────────────────────────────
 static Arduino_Canvas  *canvas      = nullptr;
-static TouchDrvFT6X36   s_touch;
+// Built via board_make_touch() so the right driver is chosen per board
+// revision. A raw FocalTech instance talks to 0x38, which nothing answers
+// on an AMOLED-1.8 V2 (CST816 @0x15) — touch was silently dead there.
+static TouchDrvInterface *s_touch = nullptr;
 static Preferences      s_prefs;
 
 static uint32_t  s_minutes  = 25;     // configured countdown duration (1..180)
@@ -433,8 +435,8 @@ void app_countdown_setup(Arduino_OLED *gfx) {
 
     loadConfig();
 
-    if (!s_touch.begin(Wire, FT6X36_SLAVE_ADDRESS, IIC_SDA, IIC_SCL))
-        USBSerial.println("FT6X36 init failed (hourglass)");
+    s_touch = board_make_touch();
+        if (!s_touch) USBSerial.println("touch init failed");
 
     pinMode(BOOT_BTN, INPUT_PULLUP);
     drawTimerScreen();
@@ -479,7 +481,7 @@ void app_countdown_loop() {
     // ── Config-mode handling ───────────────────────────────────────────────
     if (s_inConfig) {
         int16_t tx, ty;
-        bool touching = s_touch.getPoint(&tx, &ty, 1);
+        bool touching = s_touch && s_touch->getPoint(&tx, &ty, 1);
         if (touching && !s_touchWas) {
             common_activity();
             if (inHit(HIT_MIN_M5, tx, ty)) {
